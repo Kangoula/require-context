@@ -1,4 +1,6 @@
-# require-context v1.1.0
+# require-context
+
+Fork of [Wilson Lewis' require-context](https://github.com/wilsonlewis/require-context)
 
 ## Installation
 

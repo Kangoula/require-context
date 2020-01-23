@@ -1,41 +1,44 @@
-module.exports = function(directory, recursive, regExp) {
-  var dir = require('node-dir')
-  var path = require('path')
+const requireContext = (directory, recursive, regExp) => {
+  const dir = require('node-dir')
+  const path = require('path')
+  const utils = require('./utils')
 
   // Assume absolute path by default
-  var basepath = directory
+  const basepath = directory
 
   if (directory[0] === '.') {
     // Relative path
-    basepath = path.join(__dirname, directory)
+    basepath = path.join(utils.getCallerDirectory(), directory)
   } else if (!path.isAbsolute(directory)) {
     // Module path
     basepath = require.resolve(directory)
   }
 
-  var keys = dir
+  const keys = dir
     .files(basepath, {
       sync: true,
       recursive: recursive || false
     })
-    .filter(function(file) {
+    .filter(function (file) {
       return file.match(regExp || /\.(json|js)$/)
     })
-    .map(function(file) {
+    .map(function (file) {
       return path.join('.', file.slice(basepath.length + 1))
     })
 
-  var context = function(key) {
+  const context = function (key) {
     return require(context.resolve(key))
   }
 
-  context.resolve = function(key) {
+  context.resolve = function (key) {
     return path.join(directory, key)
   }
 
-  context.keys = function() {
+  context.keys = function () {
     return keys
   }
 
   return context
 }
+
+module.exports = requireContext
