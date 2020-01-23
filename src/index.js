@@ -1,14 +1,20 @@
-const requireContext = (directory, recursive, regExp) => {
+module.exports = function (directory, recursive, regExp) {
   const dir = require('node-dir')
   const path = require('path')
-  const utils = require('./utils')
+  const callsites = require('callsites')
+
 
   // Assume absolute path by default
-  const basepath = directory
+  let basepath = directory
 
   if (directory[0] === '.') {
     // Relative path
-    basepath = path.join(utils.getCallerDirectory(), directory)
+    const callerFile = callsites()[1].getFileName()
+    // fastest method is to use substring: https://stackoverflow.com/a/23963668
+    const idx = callerFile.lastIndexOf('/')
+    const callerDir = callerFile.substring(0, idx < 0 ? string.length : idx)
+
+    basepath = path.join(callerDir, directory)
   } else if (!path.isAbsolute(directory)) {
     // Module path
     basepath = require.resolve(directory)
@@ -31,7 +37,7 @@ const requireContext = (directory, recursive, regExp) => {
   }
 
   context.resolve = function (key) {
-    return path.join(directory, key)
+    return path.join(basepath, key)
   }
 
   context.keys = function () {
@@ -40,5 +46,3 @@ const requireContext = (directory, recursive, regExp) => {
 
   return context
 }
-
-module.exports = requireContext
